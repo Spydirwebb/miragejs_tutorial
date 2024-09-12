@@ -3,7 +3,9 @@ import {
   RouterProvider
 } from 'react-router-dom'
 import ErrorPage from './errorPage'
-import Testing, {loader as testLoader} from './routes/Testing'
+import Home from './routes/Home'
+import Testing from './routes/Testing'
+import Login from './routes/Login'
 
 const router = createBrowserRouter([
   {
@@ -12,7 +14,14 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: <Testing />,
-        loader: testLoader,
+      },
+      {
+        path: "/Home",
+        element: <Home />
+      },
+      {
+        path: "/Login",
+        element: <Login />
       }
     ]
   },
