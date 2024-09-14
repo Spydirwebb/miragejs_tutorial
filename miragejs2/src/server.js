@@ -7,8 +7,8 @@ let todos = [
     {text: "learn Mirage", isDone: false},
 ]
 let users = [
-    {username: "Harry", password: "Password", loginAttemps: 0, studies: [1,2]},
-    {username: "Hermione", password: "Password1", loginAttemps: 0, studies: [3,4]},
+    {username: "Harry", password: "Password", loginAttempts: 0, locked: false, studies: [1,2]},
+    {username: "Hermione", password: "Password1", loginAttempts: 0, locked: false, studies: [3,4]},
 
 ]
 
@@ -25,13 +25,44 @@ export function makeServer({environment = 'test'} = {}) {
           this.namespace = "auth"
           this.post("/login", (schema, request) => {
             const attrs = JSON.parse(request.requestBody)
-            const username = request.params.username
-            const password = request.params.password
-            if(loginAttemps<3){
+            const reqUsername = attrs.username
+            const reqPassword = attrs.password
+            try{
+                // check username exists
+                let user = schema.users.findBy({username: reqUsername})
+                
+                if(user){                                   // user exists
+                    if(!user.locked) {                      // user not locked
+                        if(reqPassword === user.password){  // password correct 
+                            user.update({loginAttempts: 0})
+                            //set data
+                            let data = {name: user.username, studies: user.studies}
+                            //return passing response
+                            console.log(data)
+                        } else {                            // password incorrect
+                            user.update({loginAttempts : user.loginAttempts + 1})
+                            if(user.loginAttempts > 3){     // exceeded password attempts
+                                user.update({locked : true})
+                            }
+                            //return invalid response
+                            console.log("Incorrect Password. LoginAttempts: "+user.loginAttempts)
+                        }
+                    } else{                                 // user locked
+                        // return forbidden
+                        console.log("Account locked")
+                    } 
+                } else{                                     // user does not exist
+                    // return invalid response
+                    console.log("User does not exist")
+                }
+            } catch(err){
+                console.log(err)
+            }
+            /*              
                 try{
                     let user = schema.users.find(username)
                     if(user.password === password){
-                        loginAttemps = 0
+                        loginAttempts = 0
                         let headers = {}
                         let data = {
                             name: user.username,
@@ -44,10 +75,13 @@ export function makeServer({environment = 'test'} = {}) {
                     return new Response(404, headers)
                   
                 }
+
             } else{
-                let headers = {text: "exceeded login attemps"}
-                return new Response(403, headers)
+                console.log("Exceeded Login Attempts")
+                //let headers = {text: "exceeded login attemps"}
+                //return new Response(403, headers)
             }
+            */
           })
           
           // API
@@ -70,19 +104,18 @@ export function makeServer({environment = 'test'} = {}) {
         },
       
         seeds(server) {
-            todos.forEach(todo => {
-                server.create('todo', {
-                    text: todo.text,
-                    isDone: todo.isDone
-                })
+            server.db.loadData({
+                todos,
+                users
             })
+            /*
             users.forEach(user => {
                 server.create('user', {
                     username: user.username,
                     password: user.password
                 })
             })
-
+            */
         },
       
     })
