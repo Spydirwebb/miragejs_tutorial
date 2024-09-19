@@ -1,30 +1,36 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-const Login =() => {
+const Register =() => {
     const [input, setInput] = useState({
         username: "",
         password: "",
+        confirmPassword: ""
       });
-    const [user, setUser] = useState(null)
+
+    const [passMatch, setPassMatch] = useState(true)
     
     const loginAction = async() => {
-        try{
-            const response = await fetch("auth/login", {
-                method: 'POST',
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(input)
-            })
-            const res = await response.json()
-            if(res.data){
-                console.log(res.data)
-                setUser(res.data.name)
+        if(passMatch) {
+            try{
+                const response = await fetch("auth/register", {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(input)
+                })
+                const res = await response.json()
+                if(res.data){
+                    console.log(res.data)
+                    setUser(res.data.name)
+                }
+            } catch (err) {
+                console.log(err)
             }
-        } catch (err) {
-            console.log(err)
-        }
+        } else {
+            setPassMatch(false)
+        }   
     }
     
     const handleSubmit = (e) =>{
@@ -37,6 +43,14 @@ const Login =() => {
             ...prev,
         [name]: value,
     }));
+    }
+    const checkPasswordMatch = () => {
+        if (input.password === input.confirmPassword) {
+            return true
+        }
+        else {
+            return false
+        }
     }
 
     
@@ -72,12 +86,26 @@ const Login =() => {
                     your password should be more than 6 character
                     </div>
                 </div>
+                <div className="form_control">
+                    <label htmlFor="confirmPassword">Confirm Password:</label>
+                    <input
+                    type="confirmPassword"
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    aria-describedby="user-confirmPassword"
+                    aria-invalid="false"
+                    onChange={handleInput}
+                    />
+                    <div id="user-confirmPassword" className="sr-only">
+                    your password should be more than 6 character
+                    </div>
+                </div>
                 <button className="btn-submit">Submit</button>
             </form>
-            <Link to="/Register">Not a user? Register Here</Link>
-            {user ? <h3>Welcome {user}</h3>: ""}
+            {passMatch ? "" :<p>Passwords do not match</p>}
+            {}
         </div>
     )
 }
 
-export default Login
+export default Register

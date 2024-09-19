@@ -36,9 +36,11 @@ export function makeServer({environment = 'test'} = {}) {
                         if(reqPassword === user.password){  // password correct 
                             user.update({loginAttempts: 0})
                             //set data
+                            let headers = {}
                             let data = {name: user.username, studies: user.studies}
                             //return passing response
-                            console.log(data)
+                            //console.log(data)
+                            return new Response(200, headers, {data: data})
                         } else {                            // password incorrect
                             user.update({loginAttempts : user.loginAttempts + 1})
                             if(user.loginAttempts > 3){     // exceeded password attempts
@@ -58,30 +60,14 @@ export function makeServer({environment = 'test'} = {}) {
             } catch(err){
                 console.log(err)
             }
-            /*              
-                try{
-                    let user = schema.users.find(username)
-                    if(user.password === password){
-                        loginAttempts = 0
-                        let headers = {}
-                        let data = {
-                            name: user.username,
-                            studies: user.studies
-                        }
-                        return new Response(202, headers, data)
-                    }
-                } catch{
-                    let headers = {text: "username not found"}
-                    return new Response(404, headers)
-                  
-                }
-
-            } else{
-                console.log("Exceeded Login Attempts")
-                //let headers = {text: "exceeded login attemps"}
-                //return new Response(403, headers)
-            }
-            */
+        })
+          this.post("/register", (schema, request) => {
+            const attrs = JSON.parse(request.requestBody)
+            const reqUsername = attrs.username
+            const reqPassword = attrs.password
+            let newUser = {username: reqUsername, password: reqPassword, loginAttempts: 0, locked: false, studies: []}
+            //users.push(newUser)
+            return schema.users.create(newUser)
           })
           
           // API
@@ -95,7 +81,7 @@ export function makeServer({environment = 'test'} = {}) {
             const attrs = JSON.parse(request.requestBody)
             todos.push(attrs)
             return schema.todos.create(attrs)
-        })
+          })
           //DELETE Request
           this.delete("todos/:id", (schema, request) => {
               const id = request.params.id
