@@ -1,11 +1,8 @@
 import {useEffect, useState} from 'react'
-import { useLoaderData } from 'react-router-dom'
-import { getTodos } from '../lib/todos'
 
 const Testing = () => {
   const [todos, setTodos] = useState([])
   const [name, setName] = useState("")
-
 
   useEffect(() => {
     getTodos()
@@ -20,11 +17,14 @@ const Testing = () => {
 
   const createTodo = async () => {
     try {
-      const response = await fetch("api/todos", {
+      await fetch("api/todos", {
          method: 'POST', 
-         body: JSON.stringify({ 
-          text: name,
-          isDone: false
+         headers: {
+            "Content-Type": "application/json"
+         },
+          body: JSON.stringify({ 
+            text: name,
+            isDone: false
         }) 
       })
       .then((res) => {

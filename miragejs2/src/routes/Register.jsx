@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 const Register =() => {
@@ -9,33 +9,35 @@ const Register =() => {
       });
 
     const [passMatch, setPassMatch] = useState(true)
+    const [users, setUsers] = useState([])
+  
     
-    const loginAction = async() => {
-        if(passMatch) {
-            try{
-                const response = await fetch("auth/register", {
-                    method: 'POST',
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(input)
-                })
-                const res = await response.json()
-                if(res.data){
-                    console.log(res.data)
-                    setUser(res.data.name)
-                }
-            } catch (err) {
-                console.log(err)
-            }
-        } else {
-            setPassMatch(false)
-        }   
-    }
+    const createUser = async() => {
+        try{
+            await fetch("auth/register", {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(input)
+            })
+            .then((res) => {
+                console.log(res.json())
+                getUsers()
+            })
+            
+        } catch (err) {
+            console.log(err)
+        }
+    }  
     
     const handleSubmit = (e) =>{
         e.preventDefault()
-        loginAction()
+        if(checkPasswordMatch()){
+            createUser()
+        } else {
+            setPassMatch(false)
+        }
     }
     const handleInput = (e) => {
         const { name, value } = e.target;
@@ -89,7 +91,7 @@ const Register =() => {
                 <div className="form_control">
                     <label htmlFor="confirmPassword">Confirm Password:</label>
                     <input
-                    type="confirmPassword"
+                    type="password"
                     id="confirmPassword"
                     name="confirmPassword"
                     aria-describedby="user-confirmPassword"
@@ -103,7 +105,6 @@ const Register =() => {
                 <button className="btn-submit">Submit</button>
             </form>
             {passMatch ? "" :<p>Passwords do not match</p>}
-            {}
         </div>
     )
 }

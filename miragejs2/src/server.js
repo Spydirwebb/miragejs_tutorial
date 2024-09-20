@@ -23,6 +23,9 @@ export function makeServer({environment = 'test'} = {}) {
         routes() {
           // Auth
           this.namespace = "auth"
+          this.get("/users", (schema, request) => {
+            return schema.users.all()
+          })
           this.post("/login", (schema, request) => {
             const attrs = JSON.parse(request.requestBody)
             const reqUsername = attrs.username
@@ -79,7 +82,6 @@ export function makeServer({environment = 'test'} = {}) {
           //POST Request
           this.post("todos", (schema, request) => {
             const attrs = JSON.parse(request.requestBody)
-            todos.push(attrs)
             return schema.todos.create(attrs)
           })
           //DELETE Request
@@ -94,14 +96,7 @@ export function makeServer({environment = 'test'} = {}) {
                 todos,
                 users
             })
-            /*
-            users.forEach(user => {
-                server.create('user', {
-                    username: user.username,
-                    password: user.password
-                })
-            })
-            */
+            
         },
       
     })
